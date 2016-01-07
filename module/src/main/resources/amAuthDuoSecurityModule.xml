@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+
+<!DOCTYPE ServicesConfiguration PUBLIC "=//iPlanet//Service Management Services (SMS) 1.0 DTD//EN"  "jar://com/sun/identity/sm/sms.dtd">
+<ServicesConfiguration>
+	<Service name="iPlanetAMAuthDuoSecurityModuleService"
+		version="1.0">
+		<Schema
+			serviceHierarchy="/DSAMEConfig/authentication/iPlanetAMAuthDuoSecurityModuleService"
+			i18nFileName="amAuthDuoSecurityModule" revisionNumber="10"
+			i18nKey="duo-security-service-description">
+		  <Organization>
+                	<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
+                    		type="single"
+                    		syntax="number_range" rangeStart="0" rangeEnd="2147483647"
+                    		i18nKey="a500">
+            			<DefaultValues>
+                        		<Value>1</Value>
+	            		</DefaultValues>
+                	</AttributeSchema>
+ 
+                	<SubSchema name="serverconfig" inheritance="multiple">
+                    		<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
+                       	 		type="single"
+		                        syntax="number_range" rangeStart="0" rangeEnd="2147483647"
+                		        i18nKey="a500">
+		                        <DefaultValues>
+        		                    <Value>1</Value>
+                		        </DefaultValues>
+	                       </AttributeSchema>
+           	      </SubSchema>
+            	  </Organization>
+		</Schema>
+	</Service>
+</ServicesConfiguration>
