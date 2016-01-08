@@ -61,9 +61,9 @@ public class DuoSecurityModule extends AMLoginModule {
     private String txid = "";
     private String status_detail = "";
     private String userName;
-    private String secret-key = “your secret key here”;
-    private String integration-key = “your integration key here”;
-    private String api-server-host = “your api server host name”;
+    private String secret_key = “your secret key here”;
+    private String integration_key = “your integration key here”;
+    private String api_server_host = “your api server host name”;
 
     /**
      * Constructs an instance of the DuoSecurityModule.
@@ -134,10 +134,10 @@ public class DuoSecurityModule extends AMLoginModule {
         String status = "";
         // SINGLE poll
         //while (result.equals("waiting")) { 
-        Http request = new Http("GET”,api-server-host,
+        Http request = new Http("GET",api_server_host,
                                 "/auth/v2/auth_status");
         request.addParam("txid", txid);
-        request.signRequest(secret-key, integration-key, 2);
+        request.signRequest(integration_key, secret_key, 2);
 
         JSONObject response = (JSONObject)request.executeRequest();
         result = response.getString("result");
@@ -155,13 +155,13 @@ public class DuoSecurityModule extends AMLoginModule {
         // Make API call for phone verification
         try{
             Http request = new Http("POST",
-                                    api-server-host,
+                                    api_server_host,
                                     "/auth/v2/auth");
             request.addParam("username", userName);
             request.addParam("factor", "push");
             request.addParam("device", "auto");
             request.addParam("async", String.valueOf(async));
-            request.signRequest(secret-key, integration-key, 2);
+            request.signRequest(integration_key, secret_key, 2);
 
             response = (JSONObject) request.executeRequest();
             request = null;
