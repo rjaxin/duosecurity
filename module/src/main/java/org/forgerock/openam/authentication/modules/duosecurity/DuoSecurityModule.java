@@ -39,10 +39,12 @@ import com.sun.identity.shared.datastruct.CollectionHelper;
 import com.sun.identity.shared.debug.Debug;
 import javax.security.auth.callback.ConfirmationCallback;
 
+
 import org.apache.commons.lang.StringUtils;
 
 import com.sun.identity.authentication.util.ISAuthConstants;
 import com.sun.identity.authentication.spi.AuthLoginException;
+import com.sun.identity.authentication.service.AuthException;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -96,13 +98,25 @@ public class DuoSecurityModule extends AMLoginModule {
         secret_key = CollectionHelper.getMapAttr(options,"duo-security-secret-key");
         integration_key = CollectionHelper.getMapAttr(options,"duo-security-integration-key");
         api_server_host = CollectionHelper.getMapAttr(options,"duo-security-api-host");
-        if (CollectionHelper.getMapAttr(options,"duo-security-auto-push") == "true") {
-        	auto_push = true;
-        }
+        auto_push = Boolean.valueOf(CollectionHelper.getMapAttr(options,"duo-security-auto-push"));
+
         debug.message("\n\n secret_key -> "+secret_key);
         debug.message("\n\n integration_key -> "+integration_key);
         debug.message("\n\n api_server_host -> "+api_server_host);
-        debug.message("\n\n auto_push -> "+ CollectionHelper.getMapAttr(options,"duo-security-auto-push"));
+        debug.message("\n\n auto_push -> "+ auto_push);
+        
+        
+        if (auto_push) {
+        	//autopush is enabled so start the API on init rather than callback 1
+        	debug.message("Auto-push enabled, Submit AuthAPI on Init");
+        	try {
+	       		 txid = invokeDuoSecurityAuthAPI(1);
+	       	 } catch(Exception ex) {
+	       		 debug.message("Exception submitting AuthAPI request to Duo!!");
+	           	 //throw new AuthException(ex);
+	       	 }
+        	
+        }
         
     }
 
@@ -127,13 +141,52 @@ public class DuoSecurityModule extends AMLoginModule {
     	if (button == 1) return CANCELED;
     	
          switch (state) {
-	         case ISAuthConstants.LOGIN_START: 
-	        	 try {
-	        		 txid = invokeDuoSecurityAuthAPI(1);
-	        		 nextState = STATE_AUTH;
-	        	 } catch(Exception ex) {
-	        		 debug.message("Exception submitting AuthAPI request to Duo!!");
-                	 throw new AuthLoginException(ex);
+	         case ISAuthConstants.LOGIN_START:
+	        	 
+	        	 if (auto_push) {
+	        		//Auto-push is enabled so callback 1 becomes callback 2
+	        		 debug.message("auto-push enabled, skipping first callback");
+	        		 
+	        		 
+	        		// String new_hdr = ssa + " " + bundle.getString("sampleauth-ui-login-header");
+	        	    //    substituteHeader(STATE_AUTH, new_hdr);
+	        	 
+	        	    //    Callback[] cbs_phone = getCallback(STATE_AUTH);
+	        	 
+	        	    //    replaceCallback(STATE_AUTH, 0,
+	        	    //                new NameCallback(bundle.getString("sampleauth-ui-username-prompt")));
+	        	 
+	        	    //    replaceCallback(STATE_AUTH, 1,
+	        	    //                new PasswordCallback(bundle.getString("sampleauth-ui-password-prompt"), false));
+	        		 
+	        		
+	        		 try {
+	            		 debug.message("polling with txid: "+txid);
+	            		 String result = pollDuoPushAuthStatus(txid);
+	            		 if(result.equals("waiting")) {
+	            			 nextState = STATE_AUTH;
+	            		 } else if(result.equals("allow")) {
+	            			 nextState =  ISAuthConstants.LOGIN_SUCCEED;
+	            		 } else if(result.equals("deny")) {
+	            		 	 throw new AuthLoginException("Duo Push denied: "+status_detail);
+	            		 } else {
+	            			 debug.error("not expecting this result: "+result);
+	            			 throw new AuthLoginException("Bad result from Duo Push: "+result);
+	            		 }
+	            	 } catch(Exception ex) {
+	            		 debug.error("Exception polling for result!!");
+	                	 throw new AuthLoginException(ex);
+	            	 }
+	        		 
+	        		 
+	        	 } else {
+	        	 	 try {
+		        		 txid = invokeDuoSecurityAuthAPI(1);
+		        		 nextState = STATE_AUTH;
+		        	 } catch(Exception ex) {
+		        		 debug.message("Exception submitting AuthAPI request to Duo!!");
+	                	 throw new AuthLoginException(ex);
+		        	 }
 	        	 }
                  break;
              case STATE_AUTH:
