@@ -21,16 +21,34 @@
   your own identifying information:
   "Portions Copyrighted [year] [name of copyright owner]"
 -->
-
+<!DOCTYPE ModuleProperties PUBLIC "=//iPlanet//Authentication Module Properties XML Interface 1.0 DTD//EN"
+        "jar://com/sun/identity/authentication/Auth_Module_Properties.dtd">
+        
 <ModuleProperties moduleName="DuoSecurity" version="1.0" >
-    <Callbacks length="1" order="1" timeout="600" template="duoSecurityLogin.jsp">
-    	<NameCallback>
-    		<Prompt>Duo</Prompt>
-    	</NameCallback>
+    <Callbacks length="1" order="1" timeout="600" header="You must authorize this login from your device">
+    	<ConfirmationCallback>
+            <OptionValues>
+                <OptionValue>
+                    <Value>Authorize with Device</Value>
+                </OptionValue>
+                <OptionValue>
+                    <Value>Cancel</Value>
+                </OptionValue>
+             </OptionValues>
+        </ConfirmationCallback>
     </Callbacks>
-    <Callbacks length="1" order="2" timeout="600" template="duoSecurityLogin.jsp">
-        <NameCallback>
-        	<Prompt>Check your device ..</Prompt>
-        </NameCallback>
+    <Callbacks length="1" order="2" timeout="600" header="Continue once you have authorized the login on your device">
+        <ConfirmationCallback>
+            <OptionValues>
+                <OptionValue>
+                    <Value>Continue</Value>
+                </OptionValue>
+                <OptionValue>
+                    <Value>Cancel</Value>
+                </OptionValue>
+             </OptionValues>
+        </ConfirmationCallback>
+    </Callbacks>
+    <Callbacks length="0" order="3" timeout="600" header="Authentication Cancelled" error="true" >
     </Callbacks>
 </ModuleProperties>

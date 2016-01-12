@@ -37,6 +37,7 @@ import com.sun.identity.idm.IdSearchResults;
 import com.sun.identity.idm.IdType;
 import com.sun.identity.shared.datastruct.CollectionHelper;
 import com.sun.identity.shared.debug.Debug;
+import javax.security.auth.callback.ConfirmationCallback;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -64,6 +65,7 @@ public class DuoSecurityModule extends AMLoginModule {
     private Map options;
     
     // orders defined in the callbacks file
+    private final static int CANCELED = 3;
     private final static int STATE_AUTH = 2;
     private String txid = "";
     private String status_detail = "";
@@ -71,6 +73,7 @@ public class DuoSecurityModule extends AMLoginModule {
     private String secret_key;
     private String integration_key;
     private String api_server_host;
+    private Boolean auto_push = false;
     
 
     /**
@@ -93,10 +96,13 @@ public class DuoSecurityModule extends AMLoginModule {
         secret_key = CollectionHelper.getMapAttr(options,"duo-security-secret-key");
         integration_key = CollectionHelper.getMapAttr(options,"duo-security-integration-key");
         api_server_host = CollectionHelper.getMapAttr(options,"duo-security-api-host");
-        
+        if (CollectionHelper.getMapAttr(options,"duo-security-auto-push") == "true") {
+        	auto_push = true;
+        }
         debug.message("\n\n secret_key -> "+secret_key);
         debug.message("\n\n integration_key -> "+integration_key);
         debug.message("\n\n api_server_host -> "+api_server_host);
+        debug.message("\n\n auto_push -> "+ CollectionHelper.getMapAttr(options,"duo-security-auto-push"));
         
     }
 
@@ -111,7 +117,15 @@ public class DuoSecurityModule extends AMLoginModule {
     	if (debug.messageEnabled()) {
     		debug.message("DuoSecurity::process state: " + state);
         }
+    	
+    	ConfirmationCallback cc = (ConfirmationCallback) callbacks[0];
+    	int button = cc.getSelectedIndex();
+    	
+    	
     	int nextState = STATE_AUTH;
+    	
+    	if (button == 1) return CANCELED;
+    	
          switch (state) {
 	         case ISAuthConstants.LOGIN_START: 
 	        	 try {
