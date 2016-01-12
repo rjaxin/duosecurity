@@ -35,35 +35,43 @@ import com.sun.identity.idm.IdRepoException;
 import com.sun.identity.idm.IdSearchControl;
 import com.sun.identity.idm.IdSearchResults;
 import com.sun.identity.idm.IdType;
+import com.sun.identity.shared.datastruct.CollectionHelper;
 import com.sun.identity.shared.debug.Debug;
+
 import org.apache.commons.lang.StringUtils;
+
 import com.sun.identity.authentication.util.ISAuthConstants;
 import com.sun.identity.authentication.spi.AuthLoginException;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.login.LoginException;
+
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import org.json.JSONObject;
 
+import org.json.JSONObject;
 import org.forgerock.openam.authentication.modules.duosecurity.client.Http;
 
 public class DuoSecurityModule extends AMLoginModule {
 
     private static final String AUTH_MODULE_NAME = "amAuthDuoSecurity";
     private static final Debug debug = Debug.getInstance(AUTH_MODULE_NAME);
+    
+    private Map options;
+    
     // orders defined in the callbacks file
     private final static int STATE_AUTH = 2;
     private String txid = "";
     private String status_detail = "";
     private String userName;
-    private String secret_key = “your secret key here”;
-    private String integration_key = “your integration key here”;
-    private String api_server_host = “your api server host name”;
+    private String secret_key;
+    private String integration_key;
+    private String api_server_host;
+    
 
     /**
      * Constructs an instance of the DuoSecurityModule.
@@ -78,7 +86,18 @@ public class DuoSecurityModule extends AMLoginModule {
     public void init(Subject subject, Map sharedState, Map options) {
 
         userName = (String) sharedState.get(getUserKey());
-        debug.message(“\n\n username -> "+userName);
+        debug.message("\n\n username -> "+userName);
+
+        this.options = options;		
+        
+        secret_key = CollectionHelper.getMapAttr(options,"duo-security-secret-key");
+        integration_key = CollectionHelper.getMapAttr(options,"duo-security-integration-key");
+        api_server_host = CollectionHelper.getMapAttr(options,"duo-security-api-host");
+        
+        debug.message("\n\n secret_key -> "+secret_key);
+        debug.message("\n\n integration_key -> "+integration_key);
+        debug.message("\n\n api_server_host -> "+api_server_host);
+        
     }
 
     /**
@@ -114,11 +133,11 @@ public class DuoSecurityModule extends AMLoginModule {
             		 } else if(result.equals("deny")) {
             		 	 throw new AuthLoginException("Duo Push denied: "+status_detail);
             		 } else {
-            			 debug.error(“not expecting this result: "+result);
+            			 debug.error("not expecting this result: "+result);
             			 throw new AuthLoginException("Bad result from Duo Push: "+result);
             		 }
             	 } catch(Exception ex) {
-            		 debug.error(“Exception polling for result!!");
+            		 debug.error("Exception polling for result!!");
                 	 throw new AuthLoginException(ex);
             	 }
                  break;
@@ -144,7 +163,7 @@ public class DuoSecurityModule extends AMLoginModule {
         status = response.getString("status");
         status_detail = response.getString("status_msg");
 
-        debug.message(“Duo Push status: " +  status);
+        debug.message("Duo Push status: " +  status);
         //}
         return result;
     }

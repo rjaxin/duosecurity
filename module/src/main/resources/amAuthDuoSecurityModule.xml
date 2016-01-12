@@ -3,33 +3,55 @@
 
 <!DOCTYPE ServicesConfiguration PUBLIC "=//iPlanet//Service Management Services (SMS) 1.0 DTD//EN"  "jar://com/sun/identity/sm/sms.dtd">
 <ServicesConfiguration>
-	<Service name="iPlanetAMAuthDuoSecurityModuleService"
-		version="1.0">
+	<Service name="iPlanetAMAuthDuoSecurityModuleService" version="1.0">
 		<Schema
 			serviceHierarchy="/DSAMEConfig/authentication/iPlanetAMAuthDuoSecurityModuleService"
 			i18nFileName="amAuthDuoSecurityModule" revisionNumber="10"
 			i18nKey="duo-security-service-description">
-		  <Organization>
-                	<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
-                    		type="single"
-                    		syntax="number_range" rangeStart="0" rangeEnd="2147483647"
-                    		i18nKey="a500">
-            			<DefaultValues>
-                        		<Value>1</Value>
-	            		</DefaultValues>
-                	</AttributeSchema>
- 
-                	<SubSchema name="serverconfig" inheritance="multiple">
-                    		<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
-                       	 		type="single"
-		                        syntax="number_range" rangeStart="0" rangeEnd="2147483647"
-                		        i18nKey="a500">
-		                        <DefaultValues>
-        		                    <Value>1</Value>
-                		        </DefaultValues>
-	                       </AttributeSchema>
-           	      </SubSchema>
-            	  </Organization>
+			<Organization>
+
+
+				<AttributeSchema name="duo-security-secret-key"
+					type="single" syntax="string" validator="no" i18nKey="n030title">
+				</AttributeSchema>
+
+				<AttributeSchema name="duo-security-integration-key"
+					type="single" syntax="string" validator="no" i18nKey="n040title">
+				</AttributeSchema>
+
+				<AttributeSchema name="duo-security-api-host" type="single"
+					syntax="string" validator="no" i18nKey="n050title">
+				</AttributeSchema>
+
+				<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
+					type="single" syntax="number_range" rangeStart="0" rangeEnd="2147483647"
+					i18nKey="a500">
+					<DefaultValues>
+						<Value>1</Value>
+					</DefaultValues>
+				</AttributeSchema>
+
+				<SubSchema name="serverconfig" inheritance="multiple">
+					<AttributeSchema name="duo-security-secret-key"
+						type="single" syntax="string" validator="no" i18nKey="n030title">
+					</AttributeSchema>
+
+					<AttributeSchema name="duo-security-integration-key"
+						type="single" syntax="string" validator="no" i18nKey="n040title">
+					</AttributeSchema>
+
+					<AttributeSchema name="duo-security-api-host" type="single"
+						syntax="string" validator="no" i18nKey="n050title">
+					</AttributeSchema>
+					<AttributeSchema name="iplanet-am-auth-duosecurity-auth-level"
+						type="single" syntax="number_range" rangeStart="0" rangeEnd="2147483647"
+						i18nKey="a500">
+						<DefaultValues>
+							<Value>1</Value>
+						</DefaultValues>
+					</AttributeSchema>
+				</SubSchema>
+			</Organization>
 		</Schema>
 	</Service>
 </ServicesConfiguration>
